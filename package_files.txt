@@ -1,0 +1,7 @@
+mpy submodules/Adafruit_CircuitPython_PCF8563/adafruit_pcf8563/clock.py clock.mpy
+mpy submodules/Adafruit_CircuitPython_PCF8563/adafruit_pcf8563/pcf8563.py pcf8563.mpy
+mpy submodules/Adafruit_CircuitPython_PCF8563/adafruit_pcf8563/timer.py timer.mpy
+folder /lib/adafruit_pcf8563
+file clock.mpy /lib/adafruit_pcf8563/clock.mpy
+file pcf8563.mpy /lib/adafruit_pcf8563/pcf8563.mpy
+file timer.mpy /lib/adafruit_pcf8563/timer.mpy
