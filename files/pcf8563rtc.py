@@ -1,4 +1,4 @@
-rename_process("bma423axis")
+rename_process("pcf8563rtc")
 vr("opts", be.api.xarg())
 be.api.setvar("return", "1")
 if "i" in vr("opts")["o"]:
@@ -13,44 +13,52 @@ if "i" in vr("opts")["o"]:
             term.write("Could not parse node, using default.")
     try:
         vr("i2c", be.devices["i2c"][vr("busn")])
-        from bma423 import BMA423
-        vr("bma", BMA423(vr("i2c")))
-        be.based.run("mknod BMA423")
+        from adafruit_pcf8563.pcf8563 import PCF8563
+
+        vr("rtcn", PCF8563(vr("i2c")))
+        del PCF8563
+        be.based.run("mknod rtc")
         vr("node", be.api.getvar("return"))
         be.api.subscript("/bin/stringproccessing/devid.py")
-        vr("bma").acc_range = 3
-        be.devices["BMA423"][vr("dev_id")] = vr("bma")
-        del BMA423
-        dmtex("Created BMA423 sensor")
-        class temp:
-            def __init__(self, bma):
-                self._bma = bma
-
-            @property
-            def name(self) -> str:
-                return "BMA423-Temp0"
-            @property
-            def temperature(self) -> float:
-                return float(self._bma.temperature)
-
-        be.based.run("mknod temp")
-        vr("node", be.api.getvar("return"))
-        be.api.subscript("/bin/stringproccessing/devid.py")
-        be.devices["temp"][vr("dev_id")] = temp(vr("bma"))
-        del temp
-        dmtex("Temperature sensor registered at /dev/temp" + str(vr("dev_id")))
+        be.devices["rtc"][vr("dev_id")] = vr("rtcn")
+        dmtex("Created PCF8563 RTC device")
     except:
-        dmtex("Failed to create BMA423 sensor!")
+        dmtex("Failed to load PCF8563 RTC!")
         try:
-            del BMA423
+            del PCF8563
         except NameError:
             pass
     be.api.setvar("return", "0")
+elif "c" in vr("opts")["o"] and vr("opts")["o"]["c"] is not None:
+    vr("dev", vr("opts")["o"]["c"])
+    vr("dev_id", None)
+    if vr("dev").startswith("/dev/rtc"):
+        try:
+            vr("dev_id", int(vr("dev")[-1:]))
+        except:
+            term.write("unidentified device node!")
+    if vr("dev_id") is not None:
+        vr("rtc", None)
+        try:
+            vr("rtc", be.devices["rtc"][vr("dev_id")])
+        except:
+            term.write("Could not find rtc device!")
+        if vr("rtc") is not None:
+            if vr("rtc").datetime_compromised or vr("rtc").datetime < time.localtime():
+                vr("rtc").datetime = time.localtime()
+                dmtex("Updated RTC time")
+            elif time.localtime() < vr("rtc").datetime:
+                import rtc
+
+                rtc.RTC().datetime = vr("rtc").datetime
+                del rtc
+                dmtex("Restored time from RTC")
 elif "d" in vr("opts")["o"]:
-    if vr("dev") is not None and vr("dev").startswith("/dev/BMA423_"):
+    vr("dev", vr("opts")["o"]["d"])
+    if vr("dev") is not None and vr("dev").startswith("/dev/rtc"):
         be.based.run("rmnod " + vr("dev")[5:])
         be.api.setvar("return", "0")
     else:
         term.write("Invalid device node!")
 else:
-    term.write("Usage:\n    axp2101pmic -i\n    axp2101pmic -d")
+    term.write("Usage:\n pcf8563rtc    -i\n    pcf8563rtc -c /dev/rtcX\n    pcf8563rtc -d")
