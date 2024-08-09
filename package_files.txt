@@ -5,3 +5,5 @@ folder /lib/adafruit_pcf8563
 file clock.mpy /lib/adafruit_pcf8563/clock.mpy
 file pcf8563.mpy /lib/adafruit_pcf8563/pcf8563.mpy
 file timer.mpy /lib/adafruit_pcf8563/timer.mpy
+file pcf8563rtc.lja /bin/pcf8563rtc.lja
+file pcf8563rtc.py /bin/pcf8563rtc.py
