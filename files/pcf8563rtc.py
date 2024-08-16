@@ -44,15 +44,19 @@ elif "c" in vr("opts")["o"] and vr("opts")["o"]["c"] is not None:
         except:
             term.write("Could not find rtc device!")
         if vr("rtc") is not None:
-            if vr("rtc").datetime_compromised or vr("rtc").datetime < time.localtime():
-                vr("rtc").datetime = time.localtime()
-                dmtex("Updated RTC time")
-            elif time.localtime() < vr("rtc").datetime:
-                import rtc
+            vr("td", time.time() - time.mktime(vr("rtc").datetime))
+            if abs(vr("td")) > 5:
+                if vr("rtc").datetime_compromised or vr("td") > 0:
+                    vr("rtc").datetime = time.localtime()
+                    dmtex("Updated RTC time")
+                elif vr("td") < 0:
+                    import rtc
 
-                rtc.RTC().datetime = vr("rtc").datetime
-                del rtc
-                dmtex("Restored time from RTC")
+                    rtc.RTC().datetime = vr("rtc").datetime
+                    del rtc
+                    dmtex("Restored time from RTC")
+                else:
+                    dmtex("Clocks up to date.")
 elif "d" in vr("opts")["o"]:
     vr("dev", vr("opts")["o"]["d"])
     if vr("dev") is not None and vr("dev").startswith("/dev/rtc"):
