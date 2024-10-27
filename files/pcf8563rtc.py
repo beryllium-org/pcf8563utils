@@ -59,6 +59,21 @@ elif "c" in vr("opts")["o"] and vr("opts")["o"]["c"] is not None:
                     dmtex("Clocks up to date.")
             else:
                 dmtex("Clocks up to date.")
+elif "w" in vr("opts")["o"] and vr("opts")["o"]["w"] is not None:
+    vr("rtc", None)
+    vr("dev", vr("opts")["o"]["w"])
+    if vr("dev").startswith("/dev/rtc"):
+        try:
+            vr("dev_id", int(vr("dev")[-1:]))
+            try:
+                vr("rtc", be.devices["rtc"][vr("dev_id")])
+            except:
+                term.write("Could not find rtc device!")
+        except:
+            term.write("unidentified device node!")
+    if vr("rtc") is not None:
+        vr("rtc").datetime = time.localtime()
+        dmtex("Updated RTC time")
 elif "d" in vr("opts")["o"]:
     vr("dev", vr("opts")["o"]["d"])
     if vr("dev") is not None and vr("dev").startswith("/dev/rtc"):
@@ -67,4 +82,4 @@ elif "d" in vr("opts")["o"]:
     else:
         term.write("Invalid device node!")
 else:
-    term.write("Usage:\n pcf8563rtc    -i\n    pcf8563rtc -c /dev/rtcX\n    pcf8563rtc -d")
+    term.write("Usage:\n    pcf8563rtc -i            |  load the device, optionally providing an i2c bus.\n    pcf8563rtc -c /dev/rtcX  |  Perform an automatic clock sync.\n    pcf8563rtc -w /dev/rtcX  |  Write new time data onto the rtc device.\n    pcf8563rtc -d /dev/rtcX  |  Deinit an rtc device.")
