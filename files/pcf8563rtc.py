@@ -17,8 +17,10 @@ if "i" in vr("opts")["o"]:
 
         vr("rtcn", PCF8563(vr("i2c")))
         del PCF8563
-        be.based.run("mknod rtc")
-        vr("node", be.api.getvar("return"))
+        be.api.setvar("argj", "mknod rtc")
+        be.api.subscript("/bin/mknod.py")
+        vr("node", be.api.getvar("out"))
+        be.api.setvar("out", None)
         be.api.subscript("/bin/stringproccessing/devid.py")
         be.devices["rtc"][vr("dev_id")] = vr("rtcn")
         dmtex("Created PCF8563 RTC device")
@@ -46,7 +48,11 @@ elif "c" in vr("opts")["o"] and vr("opts")["o"]["c"] is not None:
         if vr("rtc") is not None:
             vr("td", time.time() - time.mktime(vr("rtc").datetime))
             if abs(vr("td")) > 5:
-                if vr("rtc").datetime_compromised or vr("td") > 0 or (vr("td") < 0 and vr("td") > -600):
+                if (
+                    vr("rtc").datetime_compromised
+                    or vr("td") > 0
+                    or (vr("td") < 0 and vr("td") > -600)
+                ):
                     vr("rtc").datetime = time.localtime()
                     dmtex("Updated RTC time")
                 elif vr("td") < 0:
@@ -82,4 +88,6 @@ elif "d" in vr("opts")["o"]:
     else:
         term.write("Invalid device node!")
 else:
-    term.write("Usage:\n    pcf8563rtc -i            |  load the device, optionally providing an i2c bus.\n    pcf8563rtc -c /dev/rtcX  |  Perform an automatic clock sync.\n    pcf8563rtc -w /dev/rtcX  |  Write new time data onto the rtc device.\n    pcf8563rtc -d /dev/rtcX  |  Deinit an rtc device.")
+    term.write(
+        "Usage:\n    pcf8563rtc -i            |  load the device, optionally providing an i2c bus.\n    pcf8563rtc -c /dev/rtcX  |  Perform an automatic clock sync.\n    pcf8563rtc -w /dev/rtcX  |  Write new time data onto the rtc device.\n    pcf8563rtc -d /dev/rtcX  |  Deinit an rtc device."
+    )
